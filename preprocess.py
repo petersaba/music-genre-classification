@@ -18,16 +18,19 @@ def save_mfccs(dataset_dir_path, json_path=JSON_FILENAME, sr=SAMPLE_RATE, hop_le
     for i, (root, dir_array, file_array) in enumerate(os.walk(dataset_dir_path)):
         
         if root != dataset_dir_path:
-            # for file in file_array:
-            #     signal, sr = librosa.load(f'./{root}/{file}', sr=SAMPLE_RATE)
-            #     mfcc = librosa.feature.mfcc(y=signal, hop_length=hop_length, n_mfcc=13, n_fft=n_fft)
-            #     print(f'{file} has been read')
+            i -= 1 # first value of i is for the root directory which cannot be used to label the audio genres
+            for file in file_array:
+                signal, sr = librosa.load(f'./{root}/{file}', sr=SAMPLE_RATE)
+                mfcc = librosa.feature.mfcc(y=signal, hop_length=hop_length, n_mfcc=13, n_fft=n_fft)
+                data['mfcc'].append(mfcc)
+                data['labels'].append(i)
+                print(f'{file} has been read')
             pass
         else:
             for dir in dir_array:
                 data['genres'].append(dir)
 
-    print(data)
+    print(data['labels'])
 
 if __name__ == '__main__':
     os.chdir('dataset')
