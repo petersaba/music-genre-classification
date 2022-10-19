@@ -13,8 +13,11 @@ def save_mfccs(dataset_dir_path, json_path=JSON_FILENAME, sr=SAMPLE_RATE, hop_le
         
         if root != dataset_dir_path:
             for file in file_array:
-                signal, sr = librosa.load('file', sr=SAMPLE_RATE)
-                
+                signal, sr = librosa.load(f'./{root}/{file}', sr=SAMPLE_RATE)
+                mfcc = librosa.feature.mfcc(y=signal, hop_length=hop_length, n_mfcc=13, n_fft=n_fft)
+                print(f'{file} has been read')
+
+
 if __name__ == '__main__':
     os.chdir('dataset')
     save_mfccs('genres_original')
