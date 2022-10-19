@@ -1,5 +1,6 @@
 import os
 import librosa
+import json
 
 SAMPLE_RATE = 22050
 HOP_LENGTH = 512
@@ -22,7 +23,7 @@ def save_mfccs(dataset_dir_path, json_path=JSON_FILENAME, sr=SAMPLE_RATE, hop_le
             for file in file_array:
                 signal, sr = librosa.load(f'./{root}/{file}', sr=SAMPLE_RATE)
                 mfcc = librosa.feature.mfcc(y=signal, hop_length=hop_length, n_mfcc=13, n_fft=n_fft)
-                data['mfcc'].append(mfcc)
+                data['mfcc'].append(mfcc.tolist())
                 data['labels'].append(i)
                 print(f'{file} has been read')
             pass
@@ -30,7 +31,10 @@ def save_mfccs(dataset_dir_path, json_path=JSON_FILENAME, sr=SAMPLE_RATE, hop_le
             for dir in dir_array:
                 data['genres'].append(dir)
 
-    print(data['labels'])
+    # print(data['labels'])
+    with open(json_path, 'w') as file:
+        json.dump(data, file, indent=4)
+        
 
 if __name__ == '__main__':
     os.chdir('dataset')
