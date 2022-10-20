@@ -1,4 +1,5 @@
 import json
+from pickletools import optimize
 import numpy as np
 from sklearn.model_selection import train_test_split
 import tensorflow.python.keras as keras
@@ -33,3 +34,9 @@ if __name__ == '__main__':
         # nb of neurons is the same as the number of options in this case 10 genres
         keras.layers.Dense(10, activation='softmax')
     ])
+
+    optimizer = keras.optimizers.Adam(learning_rate=0.0001)
+    model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.summary()
+
+    model.fit(inputs_train, targets_train, validation_data=(inputs_test, targets_test), epochs=50, batch_size=32)
