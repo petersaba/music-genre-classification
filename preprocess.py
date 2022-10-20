@@ -24,35 +24,48 @@ def save_mfccs(dataset_dir_path, json_path=JSON_FILENAME, sr=SAMPLE_RATE, hop_le
     for i, (root, dir_array, file_array) in enumerate(os.walk(dataset_dir_path)):
         
         if root != dataset_dir_path:
+
             # first value of i is for the root directory which cannot be used to label the audio genres
             i -= 1 
 
             for file in file_array:
                 signal, sr = librosa.load(f'./{root}/{file}', sr=SAMPLE_RATE)
-
-                for current_segment in range(nb_segments):
-                    segment_start = samples_per_segment * current_segment
-                    segment_end = samples_per_segment * (current_segment + 1)
-
-                    segment_samples = signal[segment_start:segment_end]
-                    mfcc = librosa.feature.mfcc(y=segment_samples, hop_length=hop_length, n_mfcc=13, n_fft=n_fft)
-                    
-                    # mfcc needs to be transposed to be in the right format
-                    mfcc = mfcc.T
-
-                    # make sure that all saved mfccs have the same number of vectors so that the data is uniform
-                    if len(mfcc) == expected_nb_mfcc_vectors_per_segment:
-                        data['mfcc'].append(mfcc.tolist())
-                        data['labels'].append(i)
-                print(f'{file} has been read')
                 
+                for current_segment in range(nb_segments):
+                    
+                    segment_samples = get_segment_samples(signal, samples_per_segment, current_segment)
+                    data = add_mfcc(segment_samples, hop_length, n_fft, expected_nb_mfcc_vectors_per_segment, data, i)       
+                print(f'{file} has been read')
         else:
+
+            # fill the genres with their based on the folder names
             for dir in dir_array:
                 data['genres'].append(dir)
 
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
         
+
+def add_mfcc(signal, hop_length, n_fft, expected_nb_mfcc_vectors, data_dict, label_nb):
+
+    mfcc = librosa.feature.mfcc(y=signal, hop_length=hop_length, n_mfcc=13, n_fft=n_fft)
+                    
+    # mfcc needs to be transposed to be in the right format
+    mfcc = mfcc.T
+
+    # make sure that all saved mfccs have the same number of vectors so that the data is uniform
+    if len(mfcc) == expected_nb_mfcc_vectors:
+        data_dict['mfcc'].append(mfcc.tolist())
+        data_dict['labels'].append(label_nb)
+    
+    return data_dict
+
+def get_segment_samples(signal, samples_per_segment, current_segment):
+
+    segment_start = samples_per_segment * current_segment
+    segment_end = samples_per_segment * (current_segment + 1)
+
+    return signal[segment_start:segment_end]
 
 if __name__ == '__main__':
     os.chdir('dataset')
