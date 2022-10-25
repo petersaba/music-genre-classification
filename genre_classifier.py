@@ -3,7 +3,7 @@ from pickletools import optimize
 import numpy as np
 from sklearn.model_selection import train_test_split
 from tensorflow import keras
-import matplotlib.pyplot as plt
+from utilities import plot_model_history
 
 DATASET_PATH = './dataset/dataset.json'
 
@@ -44,3 +44,7 @@ if __name__ == '__main__':
     optimizer = keras.optimizers.Adam(learning_rate=0.00015)
     model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     model.summary()
+
+    history = model.fit(inputs_train, targets_train, validation_data=(inputs_test, targets_test), epochs=200, batch_size=32)
+
+    plot_model_history(history)
