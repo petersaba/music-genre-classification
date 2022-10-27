@@ -3,6 +3,7 @@ from genre_classifier import DATASET_PATH, load_dataset
 from sklearn.model_selection import train_test_split
 import numpy as np
 import tensorflow as tf
+from utilities import plot_model_history
 
 def prepare_data(test_size, validation_size, dataset_path=DATASET_PATH):
 
@@ -37,7 +38,7 @@ def create_model(input_shape):
 
     model.add(keras.layers.Flatten())
     model.add(keras.layers.Dense(64, activation='relu'))
-    model.add(keras.layers.Dropout(0.3))
+    model.add(keras.layers.Dropout(0.5))
 
     model.add(keras.layers.Dense(10, activation='softmax'))
 
@@ -53,3 +54,10 @@ if __name__ == "__main__":
 
     model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     model.summary()
+
+    history = model.fit(X_train, y_train, validation_data=(X_validate, y_validate), batch_size=32, epochs=50)
+
+    test_error, test_accuracy = model.evaluate(X_test, y_test, verbose=1)
+    print(f'loss is: {test_error}\naccuracy is: {test_accuracy}')
+    
+    plot_model_history(history)
