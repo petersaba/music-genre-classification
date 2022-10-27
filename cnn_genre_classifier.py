@@ -41,11 +41,15 @@ def create_model(input_shape):
 
     model.add(keras.layers.Dense(10, activation='softmax'))
 
-    return model
+    return model, keras
 
 if __name__ == "__main__":
     X_train, X_test, X_validate, y_train, y_test, y_validate = prepare_data(0.25, 0.2)
 
-    # print(type(X_train))
     input_shape = (X_train.shape[1], X_train.shape[2], X_train.shape[3])
-    model = create_model(input_shape)
+    model, keras = create_model(input_shape)
+
+    optimizer = keras.optimizers.Adam(learning_rate=0.0001)
+
+    model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    model.summary()
