@@ -5,6 +5,7 @@ import numpy as np
 import tensorflow as tf
 from utilities import plot_model_history
 
+
 def prepare_data(test_size, validation_size, dataset_path=DATASET_PATH):
 
     X, y = load_dataset(dataset_path)
@@ -24,21 +25,24 @@ def create_model(input_shape):
     keras = tf.keras
     model = keras.Sequential()
 
-    model.add(keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
-    model.add(keras.layers.MaxPool2D((3, 3), strides=(2, 2), padding='same'))
+    model.add(keras.layers.Conv2D(64, (3, 3), input_shape=input_shape))
+    model.add(keras.layers.BatchNormalization()) # normalizing input before the activation
+    model.add(keras.layers.Activation('relu'))
     model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.MaxPool2D((3, 3), strides=(2, 2), padding='same'))
 
     model.add(keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape))
-    model.add(keras.layers.MaxPool2D((3, 3), strides=(2, 2), padding='same'))
     model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.MaxPool2D((3, 3), strides=(2, 2), padding='same'))
 
     model.add(keras.layers.Conv2D(32, (2, 2), activation='relu', input_shape=input_shape))
-    model.add(keras.layers.MaxPool2D((2, 2), strides=(2, 2), padding='same'))
     model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.MaxPool2D((2, 2), strides=(2, 2), padding='same'))
 
     model.add(keras.layers.Flatten())
-    model.add(keras.layers.Dense(64, activation='relu'))
-    model.add(keras.layers.Dropout(0.5))
+
+    model.add(keras.layers.Dense(1024, activation='relu'))
+    model.add(keras.layers.Dropout(0.96))
 
     model.add(keras.layers.Dense(10, activation='softmax'))
 
@@ -50,14 +54,14 @@ if __name__ == "__main__":
     input_shape = (X_train.shape[1], X_train.shape[2], X_train.shape[3])
     model, keras = create_model(input_shape)
 
-    optimizer = keras.optimizers.Adam(learning_rate=0.0001)
+    optimizer = keras.optimizers.Adam(learning_rate=0.00005)
 
     model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics=['accuracy'])
     model.summary()
 
-    history = model.fit(X_train, y_train, validation_data=(X_validate, y_validate), batch_size=32, epochs=50)
+    history = model.fit(X_train, y_train, validation_data=(X_validate, y_validate), batch_size=512, epochs=650)
 
     test_error, test_accuracy = model.evaluate(X_test, y_test, verbose=1)
     print(f'loss is: {test_error}\naccuracy is: {test_accuracy}')
-    
+
     plot_model_history(history)
